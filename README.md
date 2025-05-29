@@ -1,2 +1,670 @@
-# my-ib-study-plan
-Study Plan for investment banking
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investment Banking Study Plan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Visualization & Content Choices: 
+        - Report Info: Overall Study Plan Structure (Phases 1-4) -> Goal: Organize, Navigate -> Presentation: Sidebar navigation links & main content sections -> Interaction: Click to scroll to phase -> Justification: Clear, hierarchical navigation for a multi-step plan. -> Library/Method: HTML/Tailwind/JS.
+        - Report Info: Sub-sections within Phases (e.g., Academic Excellence, Technical Skills) -> Goal: Inform, Organize -> Presentation: Collapsible accordion sections with headings and bulleted/paragraph content -> Interaction: Click to expand/collapse content -> Justification: Manages text volume, allows user to focus on specific areas. -> Library/Method: HTML/Tailwind/JS.
+        - Report Info: Actionable Items/Details (e.g., "Learn Excel Proficiency") -> Goal: Inform -> Presentation: Bullet points within accordions -> Interaction: None (read-only) -> Justification: Clear, scannable presentation of detailed tasks. -> Library/Method: HTML/Tailwind.
+        - Report Info: Recommended Resources -> Goal: Inform, Provide Access -> Presentation: Categorized lists (Books, Courses) with functional external links -> Interaction: Click links to open external sites -> Justification: Direct access to supplementary materials. -> Library/Method: HTML/Tailwind.
+        - Report Info: Interview Question Generation (NEW LLM FEATURE) -> Goal: Practice, Inform -> Presentation: Button to trigger LLM call, text display area for generated question, loading indicator -> Interaction: Click button to generate new question -> Justification: Provides direct, dynamic interview practice, leveraging AI for varied questions. -> Library/Method: HTML/Tailwind/JS/Gemini API (gemini-2.0-flash).
+        - Report Info: Chatbot (NEW LLM FEATURE) -> Goal: General Assistance, Q&A -> Presentation: Floating button to open modal chat window, chat message display, text input, send button, loading spinner -> Interaction: Type message, click send, receive AI response -> Justification: Offers on-demand, conversational support for any queries related to the study plan. -> Library/Method: HTML/Tailwind/JS/Gemini API (gemini-2.0-flash).
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. All visual structure is HTML/Tailwind, with JS for interactivity.
+    -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .accordion-button.active + .accordion-content {
+            max-height: 1000px; /* Adjust as needed */
+        }
+        .sidebar-link.active {
+            background-color: #EBF4FF; /* Light blue for active link */
+            color: #2C5282; /* Darker blue for text */
+            font-weight: 600;
+        }
+        /* Custom scrollbar for webkit browsers */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; /* slate-300 */
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; /* slate-400 */
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: none; /* Hidden by default */
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Chatbot specific styles */
+        .chatbot-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 90%;
+            max-width: 380px;
+            height: 500px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+            overflow: hidden;
+            transform: translateY(100%);
+            opacity: 0;
+            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+        }
+        .chatbot-container.active {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .chat-header {
+            background-color: #2C5282; /* Darker blue */
+            color: white;
+            padding: 1rem;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .chat-messages {
+            flex-grow: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            background-color: #f8fafc; /* slate-50 */
+        }
+        .chat-message {
+            margin-bottom: 0.75rem;
+            display: flex;
+        }
+        .chat-message.user {
+            justify-content: flex-end;
+        }
+        .chat-message.bot {
+            justify-content: flex-start;
+        }
+        .chat-bubble {
+            max-width: 80%;
+            padding: 0.75rem 1rem;
+            border-radius: 18px;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+        .chat-bubble.user {
+            background-color: #EBF4FF; /* Light blue */
+            color: #2C5282;
+            border-bottom-right-radius: 4px;
+        }
+        .chat-bubble.bot {
+            background-color: #e2e8f0; /* slate-200 */
+            color: #334155; /* slate-700 */
+            border-bottom-left-radius: 4px;
+        }
+        .chat-input-area {
+            padding: 1rem;
+            border-top: 1px solid #e2e8f0; /* slate-200 */
+            display: flex;
+            align-items: center;
+            background-color: #ffffff;
+        }
+        .chat-input-area textarea {
+            flex-grow: 1;
+            border: 1px solid #cbd5e1; /* slate-300 */
+            border-radius: 8px;
+            padding: 0.75rem;
+            resize: none;
+            margin-right: 0.5rem;
+            font-size: 0.95rem;
+        }
+        .chat-input-area button {
+            flex-shrink: 0;
+            background-color: #3B82F6; /* blue-500 */
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .chat-input-area button:hover {
+            background-color: #2563EB; /* blue-600 */
+        }
+        .chat-input-area button:disabled {
+            background-color: #93c5fd; /* blue-300 */
+            cursor: not-allowed;
+        }
+        .chatbot-fab {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #3B82F6; /* blue-500 */
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1001;
+            transition: background-color 0.2s ease;
+        }
+        .chatbot-fab:hover {
+            background-color: #2563EB; /* blue-600 */
+        }
+    </style>
+</head>
+<body class="bg-stone-100 text-slate-800">
+    <div class="flex flex-col md:flex-row min-h-screen">
+        <nav class="w-full md:w-64 bg-slate-800 text-white p-4 md:p-6 space-y-2 md:sticky md:top-0 md:h-screen md:overflow-y-auto">
+            <h1 class="text-2xl font-bold mb-6 text-center md:text-left text-amber-400">IB Study Plan</h1>
+            <a href="#phase1" data-target="phase1" class="sidebar-link block py-2.5 px-4 rounded-lg hover:bg-slate-700 transition duration-200">Phase 1: Foundations</a>
+            <a href="#phase2" data-target="phase2" class="sidebar-link block py-2.5 px-4 rounded-lg hover:bg-slate-700 transition duration-200">Phase 2: Deep Dive</a>
+            <a href="#phase3" data-target="phase3" class="sidebar-link block py-2.5 px-4 rounded-lg hover:bg-slate-700 transition duration-200">Phase 3: Recruitment</a>
+            <a href="#llm-interview-questions" data-target="llm-interview-questions" class="sidebar-link block py-2.5 px-4 rounded-lg hover:bg-slate-700 transition duration-200">✨ Interview Practice</a>
+            <a href="#phase4" data-target="phase4" class="sidebar-link block py-2.5 px-4 rounded-lg hover:bg-slate-700 transition duration-200">Phase 4: Securing & Succeeding</a>
+            <a href="#resources" data-target="resources" class="sidebar-link block py-2.5 px-4 rounded-lg hover:bg-slate-700 transition duration-200">Recommended Resources</a>
+            <button id="openChatbotBtn" class="sidebar-link w-full text-left py-2.5 px-4 rounded-lg hover:bg-slate-700 transition duration-200 mt-4">
+                💬 Chat with AI
+            </button>
+        </nav>
+
+        <main class="flex-1 p-4 sm:p-6 md:p-10 bg-stone-50 overflow-y-auto">
+            <header class="mb-8">
+                <h2 class="text-3xl font-bold text-slate-700">Your Interactive Guide to Breaking into Investment Banking</h2>
+                <p class="text-slate-600 mt-2">Navigate through the phases of your journey using the sidebar. Each section provides detailed steps and insights to help you succeed.</p>
+            </header>
+
+            <section id="phase1" class="content-section space-y-6 mb-12">
+                <h3 class="text-2xl font-semibold text-slate-700 border-b-2 border-amber-400 pb-2">Phase 1: Foundational Knowledge & Skill Building (Freshman/Sophomore Year)</h3>
+                <p class="text-slate-600">This initial phase is crucial for building a strong academic base and getting acquainted with the world of finance. Focus on excelling in your studies and developing core technical and soft skills early on.</p>
+                
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <button class="accordion-button w-full text-left text-xl font-semibold text-slate-700 hover:text-blue-600 focus:outline-none transition duration-200 flex justify-between items-center">
+                        1. Academic Excellence
+                        <span class="transform transition-transform duration-300">▼</span>
+                    </button>
+                    <div class="accordion-content mt-4 text-slate-600 space-y-2">
+                        <p><strong>Major Selection:</strong> While finance or economics are common, any rigorous major (e.g., engineering, computer science, liberal arts) can work if you supplement it with finance-related courses.</p>
+                        <p><strong>Core Courses:</strong></p>
+                        <ul class="list-disc list-inside ml-4 space-y-1">
+                            <li><strong>Accounting:</strong> Financial Accounting, Managerial Accounting. Understanding how to read and interpret financial statements is paramount.</li>
+                            <li><strong>Finance:</strong> Corporate Finance, Investments, Financial Markets. These provide the theoretical backbone.</li>
+                            <li><strong>Economics:</strong> Microeconomics, Macroeconomics. Helps understand market dynamics and economic indicators.</li>
+                            <li><strong>Quantitative Courses:</strong> Statistics, Calculus. Strong quantitative skills are essential.</li>
+                        </ul>
+                        <p><strong>GPA:</strong> Aim for a GPA of $3.5$ or higher, especially in relevant courses. Investment banks often use GPA as a key screening criterion.</p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <button class="accordion-button w-full text-left text-xl font-semibold text-slate-700 hover:text-blue-600 focus:outline-none transition duration-200 flex justify-between items-center">
+                        2. Technical Skill Development (Early Stages)
+                        <span class="transform transition-transform duration-300">▼</span>
+                    </button>
+                    <div class="accordion-content mt-4 text-slate-600 space-y-2">
+                        <ul class="list-disc list-inside ml-4 space-y-1">
+                            <li><strong>Excel Proficiency:</strong> Start early. Learn keyboard shortcuts, basic formulas (SUM, AVERAGE, IF, VLOOKUP, INDEX/MATCH), data manipulation, and charting.</li>
+                            <li><strong>PowerPoint Skills:</strong> Learn to create clean, professional presentations. This is crucial for pitch books.</li>
+                            <li><strong>Basic Financial News Literacy:</strong> Start reading financial news daily (e.g., Wall Street Journal, Financial Times, Bloomberg, Reuters). Understand current events and their impact on markets and companies.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <button class="accordion-button w-full text-left text-xl font-semibold text-slate-700 hover:text-blue-600 focus:outline-none transition duration-200 flex justify-between items-center">
+                        3. Extracurricular Involvement
+                        <span class="transform transition-transform duration-300">▼</span>
+                    </button>
+                    <div class="accordion-content mt-4 text-slate-600 space-y-2">
+                        <ul class="list-disc list-inside ml-4 space-y-1">
+                            <li><strong>Finance Clubs:</strong> Join your university's finance, investment, or banking clubs. Actively participate in their events, workshops, and stock pitches.</li>
+                            <li><strong>Leadership Roles:</strong> Seek leadership positions in any organization to demonstrate teamwork, initiative, and responsibility.</li>
+                            <li><strong>Case Competitions:</strong> Participate in case competitions to develop problem-solving and presentation skills.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="phase2" class="content-section space-y-6 mb-12">
+                <h3 class="text-2xl font-semibold text-slate-700 border-b-2 border-amber-400 pb-2">Phase 2: Deep Dive & Experience Acquisition (Sophomore/Junior Year)</h3>
+                 <p class="text-slate-600">In this phase, you'll solidify your technical knowledge, gain practical experience through internships, and begin building your professional network. This is where you start to truly immerse yourself in the world of investment banking.</p>
+
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <button class="accordion-button w-full text-left text-xl font-semibold text-slate-700 hover:text-blue-600 focus:outline-none transition duration-200 flex justify-between items-center">
+                        1. Advanced Technical Skills
+                        <span class="transform transition-transform duration-300">▼</span>
+                    </button>
+                    <div class="accordion-content mt-4 text-slate-600 space-y-2">
+                        <p><strong>Financial Modeling:</strong> This is the most critical technical skill.</p>
+                        <ul class="list-disc list-inside ml-4 space-y-1">
+                            <li>Learn to build $3$-statement financial models (Income Statement, Balance Sheet, Cash Flow Statement).</li>
+                            <li>Understand how to build valuation models (DCF, Comparable Company Analysis, Precedent Transactions).</li>
+                            <li>Resources: Wall Street Prep, Breaking Into Wall Street, CFI (Corporate Finance Institute) offer excellent courses.</li>
+                        </ul>
+                        <p><strong>Valuation Techniques:</strong> Master the theory and application of various valuation methodologies.</p>
+                        <p><strong>Industry Knowledge:</strong> Start researching specific industries that interest you. Understand their key drivers, trends, and major players.</p>
+                    </div>
+                </div>
+                 <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <button class="accordion-button w-full text-left text-xl font-semibold text-slate-700 hover:text-blue-600 focus:outline-none transition duration-200 flex justify-between items-center">
+                        2. Internships
+                        <span class="transform transition-transform duration-300">▼</span>
+                    </button>
+                    <div class="accordion-content mt-4 text-slate-600 space-y-2">
+                        <p><strong>Sophomore Summer Internship:</strong></p>
+                        <ul class="list-disc list-inside ml-4 space-y-1">
+                           <li>Aim for a finance-related internship, even if it's not directly in investment banking. This could be in corporate finance, wealth management, private equity, or a relevant industry role.</li>
+                           <li>The goal is to demonstrate interest in finance and gain transferable skills.</li>
+                        </ul>
+                        <p><strong>Junior Summer Internship (Crucial):</strong></p>
+                        <ul class="list-disc list-inside ml-4 space-y-1">
+                            <li>This is the most important internship for breaking into investment banking. Most full-time offers are extended to summer analysts.</li>
+                            <li>Apply to as many investment banking summer analyst programs as possible (bulge bracket, elite boutique, middle market, regional banks).</li>
+                            <li>Prepare rigorously for interviews (see Phase 3).</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <button class="accordion-button w-full text-left text-xl font-semibold text-slate-700 hover:text-blue-600 focus:outline-none transition duration-200 flex justify-between items-center">
+                        3. Networking
+                        <span class="transform transition-transform duration-300">▼</span>
+                    </button>
+                    <div class="accordion-content mt-4 text-slate-600 space-y-2">
+                        <ul class="list-disc list-inside ml-4 space-y-1">
+                            <li><strong>Informational Interviews:</strong> Reach out to alumni, family friends, and professionals in investment banking. Ask about their roles, their firm, and advice on breaking in.</li>
+                            <li><strong>Career Fairs & On-Campus Events:</strong> Attend all relevant events hosted by your university's career services.</li>
+                            <li><strong>LinkedIn:</strong> Build a professional LinkedIn profile and use it to connect with professionals.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="phase3" class="content-section space-y-6 mb-12">
+                <h3 class="text-2xl font-semibold text-slate-700 border-b-2 border-amber-400 pb-2">Phase 3: Recruitment & Interview Preparation (Junior Year - Fall/Spring)</h3>
+                <p class="text-slate-600">This phase is intense and laser-focused on securing that critical summer analyst position, which often serves as the primary gateway to a full-time investment banking offer. Rigorous preparation is key.</p>
+                 <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <button class="accordion-button w-full text-left text-xl font-semibold text-slate-700 hover:text-blue-600 focus:outline-none transition duration-200 flex justify-between items-center">
+                        1. Interview Preparation (Ongoing)
+                        <span class="transform transition-transform duration-300">▼</span>
+                    </button>
+                    <div class="accordion-content mt-4 text-slate-600 space-y-2">
+                        <p><strong>Behavioral Questions:</strong> Prepare compelling stories for common questions like "Why IB?", "Why our firm?", "Walk me through your resume," "Tell me about a time you failed/succeeded." Use the STAR method (Situation, Task, Action, Result).</p>
+                        <p><strong>Technical Questions:</strong></p>
+                        <ul class="list-disc list-inside ml-4 space-y-1">
+                            <li><strong>Accounting:</strong> Understand the $3$ financial statements, how they link, and key accounting concepts.</li>
+                            <li><strong>Valuation:</strong> Be able to explain DCF, comps, precedents, and their pros/cons. Know how to calculate enterprise value and equity value.</li>
+                            <li><strong>Brain Teasers/Market Sizing:</strong> Practice these to demonstrate logical thinking.</li>
+                            <li><strong>Current Events:</strong> Be prepared to discuss recent M&A deals, IPOs, and market trends.</li>
+                        </ul>
+                        <p><strong>Mock Interviews:</strong> Practice extensively with career services, alumni, and peers. Get feedback on your answers and delivery.</p>
+                    </div>
+                </div>
+                 <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <button class="accordion-button w-full text-left text-xl font-semibold text-slate-700 hover:text-blue-600 focus:outline-none transition duration-200 flex justify-between items-center">
+                        2. Application Process
+                        <span class="transform transition-transform duration-300">▼</span>
+                    </button>
+                    <div class="accordion-content mt-4 text-slate-600 space-y-2">
+                        <ul class="list-disc list-inside ml-4 space-y-1">
+                            <li><strong>Resume & Cover Letter:</strong> Tailor your resume and cover letter for each application. Highlight relevant coursework, skills, and experiences. Quantify achievements whenever possible.</li>
+                            <li><strong>Online Applications:</strong> Apply early as soon as applications open.</li>
+                            <li><strong>Superdays:</strong> If you get invited to a "Superday" (final round of interviews), be prepared for a full day of interviews with various professionals.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="llm-interview-questions" class="content-section space-y-6 mb-12">
+                <h3 class="text-2xl font-semibold text-slate-700 border-b-2 border-amber-400 pb-2">✨ Interview Practice with AI</h3>
+                <p class="text-slate-600">Practice your interview skills with dynamically generated questions. Click the button below to get a new technical or behavioral question. This feature uses the Gemini API to provide fresh questions for your preparation.</p>
+                
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h4 class="text-xl font-semibold text-slate-700 mb-4">Generate an Interview Question</h4>
+                    <button id="generateQuestionBtn" class="bg-blue-600 text-white px-6 py-3 rounded-lg shadow-md hover:bg-blue-700 transition duration-300 flex items-center justify-center">
+                        Generate New Question ✨
+                        <div id="questionLoadingSpinner" class="loading-spinner ml-3"></div>
+                    </button>
+                    <div id="generatedQuestion" class="mt-6 p-4 bg-blue-50 border border-blue-200 text-blue-800 rounded-lg hidden">
+                        <p class="font-medium">Your Question:</p>
+                        <p id="questionText" class="mt-2 text-lg"></p>
+                    </div>
+                    <div id="questionError" class="mt-4 p-4 bg-red-50 border border-red-200 text-red-800 rounded-lg hidden">
+                        <p>Error generating question. Please try again later.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="phase4" class="content-section space-y-6 mb-12">
+                <h3 class="text-2xl font-semibold text-slate-700 border-b-2 border-amber-400 pb-2">Phase 4: Securing & Succeeding (Junior Summer & Senior Year)</h3>
+                <p class="text-slate-600">This final phase is about excelling in your internship to secure a full-time offer or, if necessary, navigating further recruitment cycles. Your performance and networking during this period are critical.</p>
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <button class="accordion-button w-full text-left text-xl font-semibold text-slate-700 hover:text-blue-600 focus:outline-none transition duration-200 flex justify-between items-center">
+                        1. Junior Summer Internship
+                        <span class="transform transition-transform duration-300">▼</span>
+                    </button>
+                    <div class="accordion-content mt-4 text-slate-600 space-y-2">
+                        <ul class="list-disc list-inside ml-4 space-y-1">
+                            <li><strong>Performance:</strong> Work incredibly hard. Be proactive, ask intelligent questions, pay attention to detail, and be a team player.</li>
+                            <li><strong>Networking (Internal):</strong> Network within the firm. Get to know analysts, associates, VPs, and MDs.</li>
+                            <li><strong>Feedback:</strong> Actively seek feedback and implement it.</li>
+                            <li><strong>Full-Time Offer:</strong> Aim to convert your summer internship into a full-time offer. This is the most common path.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <button class="accordion-button w-full text-left text-xl font-semibold text-slate-700 hover:text-blue-600 focus:outline-none transition duration-200 flex justify-between items-center">
+                        2. Senior Year (If no offer from Junior Summer)
+                        <span class="transform transition-transform duration-300">▼</span>
+                    </button>
+                    <div class="accordion-content mt-4 text-slate-600 space-y-2">
+                        <ul class="list-disc list-inside ml-4 space-y-1">
+                            <li><strong>On-Cycle/Off-Cycle Recruitment:</strong> If you didn't secure a full-time offer, immediately pivot to full-time recruitment. Leverage your summer internship experience.</li>
+                            <li><strong>Network Relentlessly:</strong> Expand your network and reach out to contacts for full-time opportunities.</li>
+                            <li><strong>Consider Alternatives:</strong> If investment banking isn't working out, explore related fields like corporate finance, asset management, equity research, or consulting, which can serve as stepping stones.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="resources" class="content-section space-y-6 mb-12">
+                <h3 class="text-2xl font-semibold text-slate-700 border-b-2 border-amber-400 pb-2">Recommended Resources</h3>
+                <p class="text-slate-600">Leverage these resources throughout your journey. Continuous learning and staying informed are key to success in the competitive field of investment banking.</p>
+                
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h4 class="text-xl font-semibold text-slate-700 mb-3">Books</h4>
+                    <ul class="list-disc list-inside ml-4 text-slate-600 space-y-1">
+                        <li>"Investment Banking: Valuation, Leveraged Buyouts, and Mergers & Acquisitions" by Joshua Rosenbaum & Joshua Pearl</li>
+                        <li>"Financial Modeling and Valuation" by Paul Pignataro</li>
+                        <li>"The Intelligent Investor" by Benjamin Graham</li>
+                    </ul>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h4 class="text-xl font-semibold text-slate-700 mb-3">Online Courses/Platforms</h4>
+                    <ul class="list-disc list-inside ml-4 text-slate-600 space-y-1">
+                        <li><a href="https://www.wallstreetprep.com/" target="_blank" class="text-blue-600 hover:underline">Wall Street Prep</a></li>
+                        <li><a href="https://breakingintowallstreet.com/" target="_blank" class="text-blue-600 hover:underline">Breaking Into Wall Street (BIWS)</a></li>
+                        <li><a href="https://corporatefinanceinstitute.com/" target="_blank" class="text-blue-600 hover:underline">Corporate Finance Institute (CFI)</a></li>
+                        <li><a href="https://www.udemy.com/courses/finance-and-accounting/" target="_blank" class="text-blue-600 hover:underline">Udemy (Finance & Accounting)</a> / <a href="https://www.coursera.org/browse/business/finance" target="_blank" class="text-blue-600 hover:underline">Coursera (Finance)</a></li>
+                    </ul>
+                </div>
+
+                 <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h4 class="text-xl font-semibold text-slate-700 mb-3">News & Publications</h4>
+                    <ul class="list-disc list-inside ml-4 text-slate-600 space-y-1">
+                        <li><a href="https://www.wsj.com/" target="_blank" class="text-blue-600 hover:underline">The Wall Street Journal</a></li>
+                        <li><a href="https://www.ft.com/" target="_blank" class="text-blue-600 hover:underline">Financial Times</a></li>
+                        <li><a href="https://www.bloomberg.com/" target="_blank" class="text-blue-600 hover:underline">Bloomberg</a></li>
+                        <li><a href="https://www.reuters.com/" target="_blank" class="text-blue-600 hover:underline">Reuters</a></li>
+                        <li><a href="https://www.thedeal.com/" target="_blank" class="text-blue-600 hover:underline">Mergers & Acquisitions (M&A) publications</a></li>
+                    </ul>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h4 class="text-xl font-semibold text-slate-700 mb-3">Networking Platforms</h4>
+                    <ul class="list-disc list-inside ml-4 text-slate-600 space-y-1">
+                        <li><a href="https://www.linkedin.com/" target="_blank" class="text-blue-600 hover:underline">LinkedIn</a></li>
+                        <li>University Alumni Networks (check your university's specific portal)</li>
+                    </ul>
+                </div>
+            </section>
+            
+            <footer class="mt-12 pt-8 border-t border-slate-300 text-center text-slate-500">
+                <p>&copy; <span id="currentYear"></span> Interactive Study Plan. Your roadmap to Investment Banking.</p>
+                <p class="text-sm mt-1">This application is for informational purposes only.</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <div id="chatbotFab" class="chatbot-fab">
+        💬
+    </div>
+
+    <div id="chatbotContainer" class="chatbot-container">
+        <div class="chat-header">
+            <h4 class="text-lg font-semibold">IB Study Bot</h4>
+            <button id="closeChatbotBtn" class="text-white text-2xl font-bold leading-none">&times;</button>
+        </div>
+        <div id="chatMessages" class="chat-messages">
+            <div class="chat-message bot">
+                <div class="chat-bubble bot">
+                    Hello! I'm your IB Study Bot. Ask me anything about investment banking, the study plan, or general finance concepts.
+                </div>
+            </div>
+        </div>
+        <div class="chat-input-area">
+            <textarea id="chatInput" placeholder="Type your message..." rows="1"></textarea>
+            <button id="sendMessageBtn">Send</button>
+            <div id="chatLoadingSpinner" class="loading-spinner ml-3"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const sidebarLinks = document.querySelectorAll('.sidebar-link');
+            const contentSections = document.querySelectorAll('.content-section');
+            const accordionButtons = document.querySelectorAll('.accordion-button');
+            const generateQuestionBtn = document.getElementById('generateQuestionBtn');
+            const generatedQuestionDiv = document.getElementById('generatedQuestion');
+            const questionTextSpan = document.getElementById('questionText');
+            const questionLoadingSpinner = document.getElementById('questionLoadingSpinner');
+            const questionErrorDiv = document.getElementById('questionError');
+
+            // Chatbot elements
+            const chatbotFab = document.getElementById('chatbotFab');
+            const chatbotContainer = document.getElementById('chatbotContainer');
+            const closeChatbotBtn = document.getElementById('closeChatbotBtn');
+            const chatMessages = document.getElementById('chatMessages');
+            const chatInput = document.getElementById('chatInput');
+            const sendMessageBtn = document.getElementById('sendMessageBtn');
+            const chatLoadingSpinner = document.getElementById('chatLoadingSpinner');
+
+            let chatHistory = [{ role: "model", parts: [{ text: "Hello! I'm your IB Study Bot. Ask me anything about investment banking, the study plan, or general finance concepts." }] }];
+
+            function updateActiveSection() {
+                let currentSectionId = window.location.hash.substring(1) || 'phase1';
+                
+                if (!document.getElementById(currentSectionId) && contentSections.length > 0) {
+                    currentSectionId = contentSections[0].id;
+                }
+
+                contentSections.forEach(section => {
+                    if (section.id === currentSectionId) {
+                        section.classList.add('active');
+                    } else {
+                        section.classList.remove('active');
+                    }
+                });
+
+                sidebarLinks.forEach(link => {
+                    if (link.dataset.target === currentSectionId) {
+                        link.classList.add('active');
+                    } else {
+                        link.classList.remove('active');
+                    }
+                });
+                
+                 const targetElement = document.getElementById(currentSectionId);
+                 if (targetElement && window.location.hash) {
+                     targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                 } else if (targetElement && !window.location.hash && currentSectionId === 'phase1') {
+                 }
+            }
+
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    const targetId = this.dataset.target;
+                    window.location.hash = targetId;
+                });
+            });
+
+            accordionButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    this.classList.toggle('active');
+                    const icon = this.querySelector('span');
+                    if (icon) {
+                        icon.classList.toggle('rotate-180');
+                    }
+                });
+            });
+            
+            // LLM Integration for Interview Questions
+            generateQuestionBtn.addEventListener('click', async () => {
+                generatedQuestionDiv.classList.add('hidden');
+                questionErrorDiv.classList.add('hidden');
+                questionLoadingSpinner.style.display = 'block'; // Show spinner
+                generateQuestionBtn.disabled = true; // Disable button during loading
+
+                try {
+                    let promptChatHistory = []; // Separate history for question generation
+                    const prompt = "Generate a challenging investment banking interview question. It can be either a technical question (e.g., related to valuation, accounting, or financial modeling) or a behavioral question (e.g., related to teamwork, leadership, or problem-solving). Provide only the question, without any answers or explanations.";
+                    promptChatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                    const payload = { contents: promptChatHistory };
+                    const apiKey = ""; // Leave as empty string for Canvas runtime
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const result = await response.json();
+
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        const text = result.candidates[0].content.parts[0].text;
+                        questionTextSpan.textContent = text;
+                        generatedQuestionDiv.classList.remove('hidden');
+                    } else {
+                        questionErrorDiv.classList.remove('hidden');
+                        console.error('Unexpected API response structure:', result);
+                    }
+                } catch (error) {
+                    questionErrorDiv.classList.remove('hidden');
+                    console.error('Error fetching interview question:', error);
+                } finally {
+                    questionLoadingSpinner.style.display = 'none'; // Hide spinner
+                    generateQuestionBtn.disabled = false; // Re-enable button
+                }
+            });
+
+            // Chatbot functionality
+            function addMessageToChat(message, sender) {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('chat-message', sender);
+                const bubbleDiv = document.createElement('div');
+                bubbleDiv.classList.add('chat-bubble', sender);
+                bubbleDiv.textContent = message;
+                messageDiv.appendChild(bubbleDiv);
+                chatMessages.appendChild(messageDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight; // Auto-scroll to bottom
+            }
+
+            chatbotFab.addEventListener('click', () => {
+                chatbotContainer.classList.add('active');
+            });
+
+            closeChatbotBtn.addEventListener('click', () => {
+                chatbotContainer.classList.remove('active');
+            });
+
+            sendMessageBtn.addEventListener('click', async () => {
+                const userMessage = chatInput.value.trim();
+                if (userMessage === '') return;
+
+                addMessageToChat(userMessage, 'user');
+                chatHistory.push({ role: "user", parts: [{ text: userMessage }] });
+                chatInput.value = ''; // Clear input
+
+                chatLoadingSpinner.style.display = 'block'; // Show spinner
+                sendMessageBtn.disabled = true;
+                chatInput.disabled = true;
+
+                try {
+                    const payload = { contents: chatHistory };
+                    const apiKey = ""; // Leave as empty string for Canvas runtime
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const result = await response.json();
+
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        const botResponse = result.candidates[0].content.parts[0].text;
+                        addMessageToChat(botResponse, 'bot');
+                        chatHistory.push({ role: "model", parts: [{ text: botResponse }] });
+                    } else {
+                        addMessageToChat("Sorry, I couldn't get a response. Please try again.", 'bot');
+                        console.error('Unexpected API response structure for chatbot:', result);
+                    }
+                } catch (error) {
+                    addMessageToChat("An error occurred. Please check your network connection.", 'bot');
+                    console.error('Error fetching chatbot response:', error);
+                } finally {
+                    chatLoadingSpinner.style.display = 'none'; // Hide spinner
+                    sendMessageBtn.disabled = false;
+                    chatInput.disabled = false;
+                    chatInput.focus(); // Focus input for next message
+                }
+            });
+
+            chatInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault(); // Prevent new line
+                    sendMessageBtn.click();
+                }
+            });
+
+            window.addEventListener('hashchange', updateActiveSection);
+            
+            updateActiveSection();
+
+            document.getElementById('currentYear').textContent = new Date().getFullYear();
+        });
+    </script>
+</body>
+</html>

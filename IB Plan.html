@@ -556,7 +556,7 @@
                     const prompt = "Generate a challenging investment banking interview question. It can be either a technical question (e.g., related to valuation, accounting, or financial modeling) or a behavioral question (e.g., related to teamwork, leadership, or problem-solving). Provide only the question, without any answers or explanations.";
                     promptChatHistory.push({ role: "user", parts: [{ text: prompt }] });
                     const payload = { contents: promptChatHistory };
-                    const apiKey = "AIzaSyCORFwU4pUTKGQfZmWz8MqNlJPsVzoimT4"; // Leave as empty string for Canvas runtime
+                    const apiKey = "AIzaSyAdunmDv12-XcVS_5czyTy_VSgznTBHpN8"; // Leave as empty string for Canvas runtime
                     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
                     const response = await fetch(apiUrl, {
@@ -620,7 +620,7 @@
 
                 try {
                     const payload = { contents: chatHistory };
-                    const apiKey = ""; // Leave as empty string for Canvas runtime
+                    const apiKey = "AIzaSyAdunmDv12-XcVS_5czyTy_VSgznTBHpN8"; // Leave as empty string for Canvas runtime
                     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
                     const response = await fetch(apiUrl, {
